@@ -1,5 +1,11 @@
 # University Timetable Management System
 
+[![Frontend Build](https://img.shields.io/github/actions/workflow/status/ISTEAMX/IS-Frontend/build.yml?branch=main&label=Frontend%20Build)](https://github.com/ISTEAMX/IS-Frontend/actions/workflows/build.yml)
+[![Frontend Release](https://img.shields.io/github/v/release/ISTEAMX/IS-Frontend?label=Frontend%20Release&color=blue)](https://github.com/ISTEAMX/IS-Frontend/releases)
+
+[![Backend Build](https://img.shields.io/github/actions/workflow/status/ISTEAMX/IS-Backend/build.yml?branch=main&label=Backend%20Build)](https://github.com/ISTEAMX/IS-Backend/actions/workflows/build.yml)
+[![Backend Release](https://img.shields.io/github/v/release/ISTEAMX/IS-Backend?label=Backend%20Release&color=green)](https://github.com/ISTEAMX/IS-Backend/releases)
+
 This project is a full-stack web application designed to collaboratively manage a university faculty's timetable. The system centralizes resources such as classrooms, professors, and student groups, and prevents human errors by automatically detecting scheduling conflicts in real-time.
 
 ## User Roles:
