@@ -56,29 +56,104 @@
 
 ## 🏗️ Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         AWS Cloud (eu-central-1)                │
-│                                                                 │
-│  ┌──────────────┐    ┌──────────────────┐    ┌───────────────┐  │
-│  │   S3 Bucket  │    │   EC2 Instance   │    │  RDS Postgres │  │
-│  │  (Frontend)  │───▶│   (Backend API)  │───▶│   (Database)  │  │
-│  │  React SPA   │    │  Spring Boot 4   │    │  PostgreSQL 15│  │
-│  └──────────────┘    └──────────────────┘    └───────────────┘  │
-│         │                     │                      │          │
-│         │            ┌───────────────┐               │          │
-│         │            │   ECR Repo    │               │          │
-│         │            │ Docker Images │               │          │
-│         │            └───────────────┘               │          │
-│         │                                            │          │
-│  ┌──────────────────────────────────────────────────────────┐   │
-│  │              CloudWatch (Logs, Metrics, Alarms)          │   │
-│  └──────────────────────────────────────────────────────────┘   │
-│  ┌──────────────────────────────────────────────────────────┐   │
-│  │           Secrets Manager (JWT, DB Credentials)          │   │
-│  └──────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
-```
+<table>
+  <tr>
+    <td colspan="5" align="center"><strong>🌐 Browser / End Users</strong></td>
+  </tr>
+  <tr>
+    <td colspan="5" align="center">⬇️ HTTPS</td>
+  </tr>
+  <tr>
+    <th colspan="5" align="center">⚙️ GitHub Actions CI/CD</th>
+  </tr>
+  <tr>
+    <td colspan="2" align="center">
+      <strong>Frontend Pipeline</strong><br/>
+      Build → Deploy to S3
+    </td>
+    <td align="center"> </td>
+    <td colspan="2" align="center">
+      <strong>Backend Pipeline</strong><br/>
+      Build → Push to ECR
+    </td>
+  </tr>
+  <tr>
+    <td colspan="5" align="center">⬇️</td>
+  </tr>
+  <tr>
+    <th colspan="5" align="center">☁️ AWS Cloud — <code>eu-central-1</code></th>
+  </tr>
+  <tr>
+    <td align="center">
+      <h4>🪣 S3</h4>
+      Static Site Hosting<br/>
+      React 19 SPA<br/>
+      Production Build
+    </td>
+    <td align="center">
+      <h4>🐳 ECR</h4>
+      Docker Image<br/>
+      Registry<br/>
+      Versioned Tags
+    </td>
+    <td align="center">
+      <h4>💻 EC2</h4>
+      Spring Boot 4<br/>
+      Java 21<br/>
+      Docker Runtime<br/>
+      <br/>
+      <em>🔐 Spring Security<br/>+ JWT Auth</em>
+    </td>
+    <td align="center">
+      <h4>🐘 RDS</h4>
+      PostgreSQL 15<br/>
+      Private Subnet<br/>
+      Automated Backups<br/>
+      Security Groups
+    </td>
+    <td align="center">
+      <h4>🔑 Secrets Manager</h4>
+      DB Credentials<br/>
+      JWT Secret Key<br/>
+      JWT Expiration
+    </td>
+  </tr>
+  <tr>
+    <td colspan="5" align="center">
+      <code>ECR</code> → <em>docker pull</em> → <code>EC2</code> → <em>JDBC</em> → <code>RDS</code> ← <em>inject</em> ← <code>Secrets Manager</code>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="5" align="center">⬇️ logs &amp; metrics</td>
+  </tr>
+  <tr>
+    <th colspan="5" align="center">📊 CloudWatch — Observability</th>
+  </tr>
+  <tr>
+    <td colspan="1"> </td>
+    <td align="center">
+      <strong>📋 Log Groups</strong><br/>
+      <code>/isteamx/backend</code>
+    </td>
+    <td align="center">
+      <strong>📈 Metrics</strong><br/>
+      CPU · Memory · HTTP
+    </td>
+    <td align="center">
+      <strong>🚨 Alarms &amp; SNS</strong><br/>
+      Email Notifications
+    </td>
+    <td colspan="1"> </td>
+  </tr>
+  <tr>
+    <th colspan="5" align="center">🏗️ Terraform (IaC)</th>
+  </tr>
+  <tr>
+    <td colspan="5" align="center">
+      <code>ec2</code> · <code>rds</code> · <code>s3</code> · <code>ecr</code> · <code>secrets-manager</code> · <code>cloudwatch</code>
+    </td>
+  </tr>
+</table>
 
 ---
 
