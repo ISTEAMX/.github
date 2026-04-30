@@ -56,104 +56,44 @@
 
 ## 🏗️ Architecture
 
-<table>
-  <tr>
-    <td colspan="5" align="center"><strong>🌐 Browser / End Users</strong></td>
-  </tr>
-  <tr>
-    <td colspan="5" align="center">⬇️ HTTPS</td>
-  </tr>
-  <tr>
-    <th colspan="5" align="center">⚙️ GitHub Actions CI/CD</th>
-  </tr>
-  <tr>
-    <td colspan="2" align="center">
-      <strong>Frontend Pipeline</strong><br/>
-      Build → Deploy to S3
-    </td>
-    <td align="center"> </td>
-    <td colspan="2" align="center">
-      <strong>Backend Pipeline</strong><br/>
-      Build → Push to ECR
-    </td>
-  </tr>
-  <tr>
-    <td colspan="5" align="center">⬇️</td>
-  </tr>
-  <tr>
-    <th colspan="5" align="center">☁️ AWS Cloud — <code>eu-central-1</code></th>
-  </tr>
-  <tr>
-    <td align="center">
-      <h4>🪣 S3</h4>
-      Static Site Hosting<br/>
-      React 19 SPA<br/>
-      Production Build
-    </td>
-    <td align="center">
-      <h4>🐳 ECR</h4>
-      Docker Image<br/>
-      Registry<br/>
-      Versioned Tags
-    </td>
-    <td align="center">
-      <h4>💻 EC2</h4>
-      Spring Boot 4<br/>
-      Java 21<br/>
-      Docker Runtime<br/>
-      <br/>
-      <em>🔐 Spring Security<br/>+ JWT Auth</em>
-    </td>
-    <td align="center">
-      <h4>🐘 RDS</h4>
-      PostgreSQL 15<br/>
-      Private Subnet<br/>
-      Automated Backups<br/>
-      Security Groups
-    </td>
-    <td align="center">
-      <h4>🔑 Secrets Manager</h4>
-      DB Credentials<br/>
-      JWT Secret Key<br/>
-      JWT Expiration
-    </td>
-  </tr>
-  <tr>
-    <td colspan="5" align="center">
-      <code>ECR</code> → <em>docker pull</em> → <code>EC2</code> → <em>JDBC</em> → <code>RDS</code> ← <em>inject</em> ← <code>Secrets Manager</code>
-    </td>
-  </tr>
-  <tr>
-    <td colspan="5" align="center">⬇️ logs &amp; metrics</td>
-  </tr>
-  <tr>
-    <th colspan="5" align="center">📊 CloudWatch — Observability</th>
-  </tr>
-  <tr>
-    <td colspan="1"> </td>
-    <td align="center">
-      <strong>📋 Log Groups</strong><br/>
-      <code>/isteamx/backend</code>
-    </td>
-    <td align="center">
-      <strong>📈 Metrics</strong><br/>
-      CPU · Memory · HTTP
-    </td>
-    <td align="center">
-      <strong>🚨 Alarms &amp; SNS</strong><br/>
-      Email Notifications
-    </td>
-    <td colspan="1"> </td>
-  </tr>
-  <tr>
-    <th colspan="5" align="center">🏗️ Terraform (IaC)</th>
-  </tr>
-  <tr>
-    <td colspan="5" align="center">
-      <code>ec2</code> · <code>rds</code> · <code>s3</code> · <code>ecr</code> · <code>secrets-manager</code> · <code>cloudwatch</code>
-    </td>
-  </tr>
-</table>
+```mermaid
+graph TD
+    Client[🌐 Browser / End Users] --> S3[🪣 S3 — Frontend Static Hosting]
+    Client --> ElasticIP[📡 Elastic IP]
+    ElasticIP --> EC2[💻 EC2 — Spring Boot 4 / Java 21]
+
+    subgraph "☁️ AWS Cloud — eu-central-1"
+        S3
+        ECR[🐳 ECR — Docker Image Registry]
+        EC2
+        RDS[(🐘 RDS — PostgreSQL 15)]
+        Secrets[🔑 Secrets Manager]
+        CWLogs[📋 CloudWatch Logs]
+        CWMetrics[📈 CloudWatch Metrics]
+        CWAlarms[🚨 CloudWatch Alarms]
+        SNS[📧 SNS — Email Alerts]
+    end
+
+    subgraph "⚙️ GitHub Actions CI/CD"
+        FE_Pipeline[Frontend Pipeline — Build → Deploy to S3]
+        BE_Pipeline[Backend Pipeline — Build → Push to ECR]
+    end
+
+    FE_Pipeline --> S3
+    BE_Pipeline --> ECR
+    ECR --> EC2
+    EC2 --> RDS
+    EC2 --> Secrets
+    EC2 --> CWLogs
+    EC2 --> CWMetrics
+    CWLogs --> CWAlarms
+    CWMetrics --> CWAlarms
+    CWAlarms --> SNS
+
+    subgraph "🏗️ Terraform IaC"
+        TF[ec2 · rds · s3 · ecr · secrets-manager · cloudwatch]
+    end
+```
 
 ---
 
@@ -232,7 +172,7 @@
 ### Prerequisites
 
 - **Java 21** — [Download](https://www.oracle.com/java/technologies/downloads/#java21)
-- **Node.js 18+** — [Download](https://nodejs.org/)
+- **Node.js 22+** — [Download](https://nodejs.org/)
 - **Docker & Docker Compose** — [Download](https://www.docker.com/)
 - **PostgreSQL 15+** — [Download](https://www.postgresql.org/) *(or use Docker)*
 
@@ -286,14 +226,18 @@ App available at [http://localhost:5173](http://localhost:5173)
 ISTEAMX/
 ├── IS-Frontend/          # React 19 + TypeScript SPA
 │   ├── src/
+│   │   ├── api/          # Axios instance & HTTP client setup
+│   │   ├── assets/       # Static assets (images, icons)
 │   │   ├── components/   # Reusable UI (DataTable, Timetable, Header, Footer)
+│   │   ├── constants/    # App-wide constants (room types, timetable config)
+│   │   ├── hooks/        # Custom React hooks
+│   │   ├── layouts/      # Layout wrappers (Main, Admin, Sidebar)
 │   │   ├── pages/        # Route pages (Home, Login, Register, Admin)
-│   │   ├── services/     # API service layer
+│   │   ├── routes/       # Routing & route protection
+│   │   ├── services/     # API service layer & error reporting
 │   │   ├── store/        # Zustand state stores
 │   │   ├── types/        # TypeScript type definitions
-│   │   ├── hooks/        # Custom React hooks
-│   │   ├── routes/       # Routing & route protection
-│   │   └── layouts/      # Layout wrappers (Main, Admin, Sidebar)
+│   │   └── utils/        # Utility functions & helpers
 │   └── docs/             # Frontend documentation
 │
 ├── IS-Backend/           # Spring Boot 4 REST API
